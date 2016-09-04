@@ -33,7 +33,7 @@ type StreamTelecomer interface {
 	GetSessionId() string
 }
 
-func Client(basePath string, timeout time.Duration) StreamTelecomer {
+func NewClient(basePath string, timeout time.Duration) StreamTelecomer {
 	return &stClient{
 		basePath: basePath,
 		timeout:  timeout,

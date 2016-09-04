@@ -13,7 +13,7 @@ func TestMain(m *testing.M) {
 	mockServer = mock.NewServer(mock.TestTimeout)
 	defer mockServer.Close()
 
-	stelecomClient = Client(mockServer.URL, mock.TestTimeout)
+	stelecomClient = NewClient(mockServer.URL, mock.TestTimeout)
 	if _, err := stelecomClient.Authorize("login", "password"); err != nil {
 		panic(err)
 	}
@@ -85,7 +85,7 @@ func TestLargeAnswer(t *testing.T) {
 }
 
 func TestGetSessionId(t *testing.T) {
-	client := Client(mockServer.URL, mock.TestTimeout)
+	client := NewClient(mockServer.URL, mock.TestTimeout)
 
 	sessionId, err := client.Authorize("login", "password")
 	if err != nil {
@@ -102,7 +102,7 @@ func TestGetSessionId(t *testing.T) {
 }
 
 func TestAuthorizeFail(t *testing.T) {
-	client := Client(mockServer.URL, mock.TestTimeout)
+	client := NewClient(mockServer.URL, mock.TestTimeout)
 
 	sessionId, err := client.Authorize("login2", "password2")
 	if err != nil {
