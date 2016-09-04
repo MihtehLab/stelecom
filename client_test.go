@@ -24,7 +24,7 @@ func TestMain(m *testing.M) {
 var (
 	mockServer     *mock.StelecomMockServer
 	testTimeout    time.Duration = 3 * time.Millisecond
-	stelecomClient Exploiter
+	stelecomClient StreamTelecomer
 )
 
 func TestCorrectAnswer(t *testing.T) {

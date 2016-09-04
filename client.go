@@ -25,7 +25,7 @@ type Sms struct {
 	Text  string
 }
 
-type Exploiter interface {
+type StreamTelecomer interface {
 	GetBalance() (float64, error)
 	SendSms(Sms) responseFromSendSms
 	Authorize(login string, password string) (string, error)
@@ -33,7 +33,7 @@ type Exploiter interface {
 	GetSessionId() string
 }
 
-func Client(basePath string, timeout time.Duration) Exploiter {
+func Client(basePath string, timeout time.Duration) StreamTelecomer {
 	return &stClient{
 		basePath: basePath,
 		timeout:  timeout,
