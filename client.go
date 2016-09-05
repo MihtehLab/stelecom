@@ -40,6 +40,10 @@ func NewClient(basePath string, timeout time.Duration) StreamTelecomer {
 	}
 }
 
+func NewDefaultClient() StreamTelecomer {
+	return NewClient("http://gateway.api.sc/rest", 10*time.Second)
+}
+
 type stClient struct {
 	timeout   time.Duration
 	basePath  string
