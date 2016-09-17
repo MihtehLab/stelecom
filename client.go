@@ -15,24 +15,32 @@ import (
 
 const header = "GLAVFINANS"
 
-const SessionIdExpired = 4
+//SessionIDExpired обозначает ситуацию когда сессия истекла
+const SessionIDExpired = 4
+
+//DirectionIsClosed статус возникает когда закончились деньги
 const DirectionIsClosed = 5
 
+//SmsStatusDelivered обозначает что смс сообщение доставлено
 const SmsStatusDelivered = "delivered"
 
+//Sms - структура для хранения смс
 type Sms struct {
 	Phone string
 	Text  string
 }
 
+//StreamTelecomer - интерфейс для работы с сервисом отправки смс-сообщений
 type StreamTelecomer interface {
 	GetBalance() (float64, error)
 	SendSms(Sms) responseFromSendSms
 	Authorize(login string, password string) (string, error)
-	GetSmsStatus(smsId string) (string, error)
-	GetSessionId() string
+	GetSmsStatus(smsID string) (string, error)
+	GetSessionID() string
 }
 
+//NewClient создает нового клиента для работы со Stream-Telecom
+//с указанными параметрами
 func NewClient(basePath string, timeout time.Duration) StreamTelecomer {
 	return &stClient{
 		basePath: basePath,
@@ -40,6 +48,8 @@ func NewClient(basePath string, timeout time.Duration) StreamTelecomer {
 	}
 }
 
+//NewDefaultClient создает нового клиента для работы со Stream-Telecom
+//с параметрами по умолчанию
 func NewDefaultClient() StreamTelecomer {
 	return NewClient("http://gateway.api.sc/rest", 10*time.Second)
 }
@@ -49,7 +59,7 @@ type stClient struct {
 	basePath  string
 	login     string
 	password  string
-	sessionId string
+	sessionID string
 	header    string
 }
 
@@ -61,16 +71,16 @@ func getValidSmsForSend() Sms {
 	return sms
 }
 
-func (c stClient) GetSessionId() string {
-	return c.sessionId
+func (c stClient) GetSessionID() string {
+	return c.sessionID
 }
 
 func (c stClient) GetBalance() (float64, error) {
-	if c.sessionId == "" {
+	if c.sessionID == "" {
 		return -1, errors.New("Клиент не авторизован. Требуется вызвать метод Authorize с корректными данными.")
 	}
 
-	urlVals := url.Values{"sessionId": {c.sessionId}}
+	urlVals := url.Values{"sessionId": {c.sessionID}}
 
 	httpClient := http.Client{Timeout: c.timeout}
 	resp, err := httpClient.Get(c.basePath + "/Balance?" + urlVals.Encode())
@@ -99,7 +109,7 @@ type sTelecomErrorResponse struct {
 }
 
 type responseFromSendSms struct {
-	HttpStatusCode int                   // сюда передаём код ответа что бы отличить ошибку метода от ошибки в StreamTelecom
+	HTTPStatusCode int                   // сюда передаём код ответа что бы отличить ошибку метода от ошибки в StreamTelecom
 	SmsIds         []string              // массив id sms при успехе
 	ResponseError  sTelecomErrorResponse // код и описание ошибки из StreamTelecom
 	Error          error                 // ошибка
@@ -107,7 +117,7 @@ type responseFromSendSms struct {
 
 func (c stClient) SendSms(sms Sms) responseFromSendSms {
 	urlVals := url.Values{
-		"sessionId":          {c.sessionId},
+		"sessionId":          {c.sessionID},
 		"destinationAddress": {sms.Phone},
 		"data":               {sms.Text},
 		"validity":           {"1440"},
@@ -189,7 +199,7 @@ func (c *stClient) Authorize(login string, password string) (string, error) {
 	c.login = login
 	c.password = password
 	c.header = header
-	c.sessionId = ""
+	c.sessionID = ""
 
 	urlVals := url.Values{
 		"login":    {c.login},
@@ -209,9 +219,9 @@ func (c *stClient) Authorize(login string, password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	c.sessionId = strings.Replace(string(data), "\"", "", -1)
+	c.sessionID = strings.Replace(string(data), "\"", "", -1)
 
-	return c.sessionId, nil
+	return c.sessionID, nil
 }
 
 // Описывает ответ при успешном запросе статуса SMS
@@ -225,10 +235,10 @@ type sTelecomGetSmsStatusResponse struct {
 	Price            *string `json:"Price"` // can be null
 }
 
-func (c *stClient) GetSmsStatus(smsId string) (string, error) {
+func (c *stClient) GetSmsStatus(smsID string) (string, error) {
 	urlVals := url.Values{
-		"sessionId": {c.sessionId},
-		"messageId": {smsId},
+		"sessionId": {c.sessionID},
+		"messageId": {smsID},
 	}
 	httpClient := http.Client{Timeout: c.timeout}
 	params := urlVals.Encode()

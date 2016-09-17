@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 
 var (
 	mockServer     *mock.StelecomMockServer
-	testTimeout    time.Duration = 3 * time.Millisecond
+	testTimeout    = 3 * time.Millisecond
 	stelecomClient StreamTelecomer
 )
 
@@ -87,30 +87,30 @@ func TestLargeAnswer(t *testing.T) {
 func TestGetSessionId(t *testing.T) {
 	client := NewClient(mockServer.URL, mock.TestTimeout)
 
-	sessionId, err := client.Authorize("login", "password")
+	sessionID, err := client.Authorize("login", "password")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if sessionId != "5f9df3e9733582f614a0b460a3e47d77" {
-		t.Fatalf("Ожидалось: [5f9df3e9733582f614a0b460a3e47d77], получено [%s]", sessionId)
+	if sessionID != "5f9df3e9733582f614a0b460a3e47d77" {
+		t.Fatalf("Ожидалось: [5f9df3e9733582f614a0b460a3e47d77], получено [%s]", sessionID)
 	}
 
-	if sessionId != client.GetSessionId() {
-		t.Fatal("Сессии не совпадают [%s] [%s]", sessionId, client.GetSessionId())
+	if sessionID != client.GetSessionID() {
+		t.Fatalf("Сессии не совпадают [%s] [%s]", sessionID, client.GetSessionID())
 	}
 }
 
 func TestAuthorizeFail(t *testing.T) {
 	client := NewClient(mockServer.URL, mock.TestTimeout)
 
-	sessionId, err := client.Authorize("login2", "password2")
+	sessionID, err := client.Authorize("login2", "password2")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if sessionId != "" {
-		t.Fatalf("Ожидается пустая строка, но вернулась: [%s]", sessionId)
+	if sessionID != "" {
+		t.Fatalf("Ожидается пустая строка, но вернулась: [%s]", sessionID)
 	}
 }
 
@@ -123,8 +123,8 @@ func TestSendSmsNotAuthorized(t *testing.T) {
 	if responseFromSendSms.Error != nil {
 		t.Fatal(responseFromSendSms.Error)
 	}
-	if responseFromSendSms.HttpStatusCode != http.StatusInternalServerError {
-		t.Fatalf("Ожидался код ответа %d, получен код %d", http.StatusInternalServerError, responseFromSendSms.HttpStatusCode)
+	if responseFromSendSms.HTTPStatusCode != http.StatusInternalServerError {
+		t.Fatalf("Ожидался код ответа %d, получен код %d", http.StatusInternalServerError, responseFromSendSms.HTTPStatusCode)
 	}
 }
 
@@ -137,8 +137,8 @@ func TestSendSms(t *testing.T) {
 	if responseFromSendSms.Error != nil {
 		t.Fatal(responseFromSendSms.Error)
 	}
-	if responseFromSendSms.HttpStatusCode != http.StatusOK {
-		t.Fatalf("Ожидался код ответа %d, получен код %d", http.StatusOK, responseFromSendSms.HttpStatusCode)
+	if responseFromSendSms.HTTPStatusCode != http.StatusOK {
+		t.Fatalf("Ожидался код ответа %d, получен код %d", http.StatusOK, responseFromSendSms.HTTPStatusCode)
 	}
 	if !reflect.DeepEqual(responseFromSendSms.SmsIds, []string{"1404497075"}) {
 		t.Fatalf("Ожидался StreamTelecomId sms: %v, получено: %v", "1404497075", responseFromSendSms.SmsIds)
@@ -154,8 +154,8 @@ func TestSendSmsTimeOut(t *testing.T) {
 	if responseFromSendSms.Error == nil {
 		t.Fatal("Ожидалась ошибка, а возвращён nil")
 	}
-	if responseFromSendSms.HttpStatusCode != http.StatusInternalServerError {
-		t.Fatalf("Ожидался код ответа %d, получен код %d", http.StatusInternalServerError, responseFromSendSms.HttpStatusCode)
+	if responseFromSendSms.HTTPStatusCode != http.StatusInternalServerError {
+		t.Fatalf("Ожидался код ответа %d, получен код %d", http.StatusInternalServerError, responseFromSendSms.HTTPStatusCode)
 	}
 }
 
@@ -166,8 +166,8 @@ func TestSendSmsNoMoney(t *testing.T) {
 
 	responseFromSendSms := stelecomClient.SendSms(sms)
 
-	if responseFromSendSms.HttpStatusCode != http.StatusPaymentRequired {
-		t.Fatalf("Ожидался код ответа %d, получен код %d", http.StatusPaymentRequired, responseFromSendSms.HttpStatusCode)
+	if responseFromSendSms.HTTPStatusCode != http.StatusPaymentRequired {
+		t.Fatalf("Ожидался код ответа %d, получен код %d", http.StatusPaymentRequired, responseFromSendSms.HTTPStatusCode)
 	}
 }
 
